@@ -4,7 +4,7 @@
 const CONFIG = {
   names: { first: "Salam", second: "Sara" },
   walimaDate: "2026-12-26T19:00:00+05:30", // countdown target
-  RSVP_LINK: "https://wa.me/+918171011960?text=Bismillah!%20I'd%20love%20to%20join%20you%20for%20the%20Walima.", // <-- replace with your real WhatsApp/RSVP link
+  RSVP_LINK: "https://wa.me/+918394907770?text=Bismillah!%20I'd%20love%20to%20join%20you%20for%20the%20Walima.", // <-- replace with your real WhatsApp/RSVP link
 };
 document.getElementById('rsvp-link').href = CONFIG.RSVP_LINK;
 
@@ -22,7 +22,75 @@ function buildLetters(el, text){
 buildLetters(document.getElementById('name1'), CONFIG.names.first);
 buildLetters(document.getElementById('name2'), CONFIG.names.second);
 
+/* letter-reveal small caps labels on scroll */
+function wrapLetters(el){
+  const text = el.textContent;
+  el.innerHTML = '';
+  [...text].forEach((ch,i) => {
+    const s = document.createElement('span');
+    s.className = 'ltr';
+    s.textContent = ch === ' ' ? '\u00A0' : ch;
+    s.style.transitionDelay = (i*0.025)+'s';
+    el.appendChild(s);
+  });
+}
+document.querySelectorAll('.count-label').forEach(wrapLetters);
+const letterIo = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.querySelectorAll('.ltr').forEach(s => s.classList.add('in')); });
+}, { threshold:0.4 });
+document.querySelectorAll('.count-label').forEach(el => letterIo.observe(el));
+
+/* ---------- rotating mandala petal rings ---------- */
+function buildMandala(id, count, len){
+  const g = document.getElementById(id);
+  if (!g) return;
+  let html = '';
+  for (let i=0;i<count;i++){
+    const angle = (360/count)*i;
+    html += `<line x1="100" y1="100" x2="100" y2="${100-len}" transform="rotate(${angle} 100 100)" stroke-opacity="0.5"/>`;
+    html += `<circle cx="100" cy="${100-len}" r="2" transform="rotate(${angle} 100 100)" stroke-opacity="0.6"/>`;
+  }
+  g.innerHTML = html;
+}
+buildMandala('petals-ring', 16, 90);
+buildMandala('petals-ring-2', 12, 70);
+
 gsap.registerPlugin(ScrollTrigger);
+
+/* ---------- cursor spotlight (desktop only, ignored on touch) ---------- */
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  const spotlight = document.getElementById('spotlight');
+  window.addEventListener('mousemove', (e) => {
+    spotlight.style.setProperty('--mx', e.clientX + 'px');
+    spotlight.style.setProperty('--my', e.clientY + 'px');
+  }, { passive:true });
+}
+
+/* ---------- reception card 3D tilt ---------- */
+const rcard = document.getElementById('rcard');
+if (rcard && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  const wrap = rcard.closest('.rcard-tilt');
+  wrap.addEventListener('mousemove', (e) => {
+    const r = rcard.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    rcard.style.transform = `rotateY(${px*10}deg) rotateX(${-py*10}deg) translateZ(0)`;
+  });
+  wrap.addEventListener('mouseleave', () => { rcard.style.transform = 'rotateY(0) rotateX(0)'; });
+}
+
+/* ---------- magnetic buttons ---------- */
+function magnetize(el, strength){
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  el.addEventListener('mousemove', (e) => {
+    const r = el.getBoundingClientRect();
+    const mx = (e.clientX - r.left - r.width/2) * strength;
+    const my = (e.clientY - r.top - r.height/2) * strength;
+    el.style.transform = `translate(${mx}px, ${my}px)`;
+  });
+  el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+}
+document.querySelectorAll('.rsvp-btn, .im-in-btn').forEach(b => magnetize(b, 0.25));
 
 /* ---------- ambient sky: crescent + stars ---------- */
 const sky = document.getElementById('sky');
@@ -74,6 +142,28 @@ function openEnvelope(){
   envOpened = true;
   envWrap.classList.add('open');
   envScreen.classList.add('open');
+  if (!reducedMotion) {
+    setTimeout(() => {
+      document.getElementById('env-flash').classList.add('burst');
+      const cx = window.innerWidth/2, cy = window.innerHeight*0.42;
+      for (let i=0;i<26;i++){
+        const el = document.createElement('div');
+        el.className = 'ember';
+        const size = 2 + Math.random()*4;
+        const angle = Math.random()*Math.PI*2;
+        const dist = 40 + Math.random()*160;
+        el.style.left = (cx/window.innerWidth*100) + 'vw';
+        el.style.top = cy + 'px';
+        el.style.bottom = 'auto';
+        el.style.width = size+'px'; el.style.height = size+'px';
+        el.style.setProperty('--drift', (Math.cos(angle)*dist)+'px');
+        el.style.transform = `translateY(${Math.sin(angle)*dist}px)`;
+        el.style.animation = `emberRise ${2+Math.random()*1.8}s ease-out forwards`;
+        document.getElementById('embers').appendChild(el);
+        setTimeout(() => el.remove(), 4200);
+      }
+    }, 550);
+  }
   setTimeout(() => {
     envScreen.classList.add('hidden');
     document.body.style.overflow = '';

@@ -28,8 +28,10 @@
   <p class="env-hint">Tap to open your invitation</p>
 </div>
 
+<div id="env-flash"></div>
 <div class="backdrop"></div>
 <div class="vignette"></div>
+<div id="spotlight"></div>
 <div id="sky"></div>
 <div id="embers"></div>
 <div id="progress"></div>
@@ -38,6 +40,13 @@
 <section id="hero">
   <div class="corner-motif tl" aria-hidden="true"><svg viewBox="0 0 60 60" fill="none"><path d="M2 2 Q2 30 2 58 M2 2 Q30 2 58 2" stroke="var(--gold)" stroke-width="1"/><circle cx="2" cy="2" r="3" fill="var(--gold)"/></svg></div>
   <div class="corner-motif tr" aria-hidden="true"><svg viewBox="0 0 60 60" fill="none"><path d="M2 2 Q2 30 2 58 M2 2 Q30 2 58 2" stroke="var(--gold)" stroke-width="1"/><circle cx="2" cy="2" r="3" fill="var(--gold)"/></svg></div>
+
+  <div class="mandala spin-slow" style="width:520px; height:520px; left:50%; top:38%; transform:translate(-50%,-50%);" aria-hidden="true">
+    <svg viewBox="0 0 200 200" fill="none" stroke="var(--gold)" stroke-width="0.5">
+      <circle cx="100" cy="100" r="96"/><circle cx="100" cy="100" r="76"/>
+      <g id="petals-ring"></g>
+    </svg>
+  </div>
 
   <div class="hero-frame">
     <div class="arch" id="arch" aria-hidden="true">
@@ -53,9 +62,9 @@
     <p id="hero-parents">Salim Farshori &amp; Atiya Iqbal<br><span>request the honour of your presence at the Walima reception of their son</span></p>
 
     <div class="hero-names">
-      <h1 class="name" id="name1"></h1>
+      <h1 class="name shimmer" id="name1"></h1>
       <span class="hero-amp">&amp;</span>
-      <h1 class="name" id="name2"></h1>
+      <h1 class="name shimmer" id="name2"></h1>
     </div>
 
     <p id="hero-tagline" class="lede">on the occasion of their marriage</p>
@@ -72,6 +81,9 @@
 
 <!-- ================= COUPLE ================= -->
 <section id="couple">
+  <div class="mandala spin-slow-rev" style="width:420px; height:420px; left:50%; top:50%; transform:translate(-50%,-50%);" aria-hidden="true">
+    <svg viewBox="0 0 200 200" fill="none" stroke="var(--gold)" stroke-width="0.4"><g id="petals-ring-2"></g></svg>
+  </div>
   <div class="container reveal-scale">
     <div class="couple-mark" aria-hidden="true">
       <svg viewBox="0 0 120 120" fill="none">
@@ -87,9 +99,9 @@
     </div>
     <p class="count-label">THE COUPLE</p>
     <div class="couple-names">
-      <span class="name">Salam</span>
+      <span class="name shimmer">Salam</span>
       <span class="couple-amp">&amp;</span>
-      <span class="name">Sara</span>
+      <span class="name shimmer">Sara</span>
     </div>
     <p class="lede couple-sub">Two hearts, one beautiful beginning</p>
   </div>
@@ -109,18 +121,20 @@
 <section id="reception">
   <div class="container reveal-scale">
     <p class="count-label">YOU ARE INVITED TO</p>
-    <div class="rcard">
-      <div class="rcard-orn top" aria-hidden="true">
-        <svg viewBox="0 0 200 30" fill="none"><path d="M0 15 H70 M130 15 H200" stroke="var(--gold)" stroke-width="0.8" opacity="0.6"/><path d="M85 5 L100 20 L115 5" stroke="var(--gold)" stroke-width="0.8" opacity="0.6"/></svg>
-      </div>
-      <h2 class="rcard-title">Walima</h2>
-      <p class="rcard-sub">An Evening of Elegance &amp; Celebration</p>
-      <div class="rcard-row"><span class="rcard-icon">&#128197;</span><span>26<sup>th</sup> December 2026</span></div>
-      <div class="rcard-row"><span class="rcard-icon">&#128337;</span><span>7:00 PM onwards</span></div>
-      <div class="rcard-row"><span class="rcard-icon">&#128205;</span><span>Rahmani Farm, Badaun</span></div>
-      <div class="rcard-attire">Finest, most elegant attire</div>
-      <div class="rcard-orn bottom" aria-hidden="true">
-        <svg viewBox="0 0 200 30" fill="none"><path d="M0 15 H70 M130 15 H200" stroke="var(--gold)" stroke-width="0.8" opacity="0.6"/><path d="M85 25 L100 10 L115 25" stroke="var(--gold)" stroke-width="0.8" opacity="0.6"/></svg>
+    <div class="rcard-tilt">
+      <div class="rcard" id="rcard">
+        <div class="rcard-orn top" aria-hidden="true">
+          <svg viewBox="0 0 200 30" fill="none"><path d="M0 15 H70 M130 15 H200" stroke="var(--gold)" stroke-width="0.8" opacity="0.6"/><path d="M85 5 L100 20 L115 5" stroke="var(--gold)" stroke-width="0.8" opacity="0.6"/></svg>
+        </div>
+        <h2 class="rcard-title shimmer">Walima</h2>
+        <p class="rcard-sub">An Evening of Elegance &amp; Celebration</p>
+        <div class="rcard-row"><span class="rcard-icon">&#128197;</span><span>26<sup>th</sup> December 2026</span></div>
+        <div class="rcard-row"><span class="rcard-icon">&#128337;</span><span>7:00 PM onwards</span></div>
+        <div class="rcard-row"><span class="rcard-icon">&#128205;</span><span>Rahmani Farm, Badaun</span></div>
+        <div class="rcard-attire">Finest, most elegant attire</div>
+        <div class="rcard-orn bottom" aria-hidden="true">
+          <svg viewBox="0 0 200 30" fill="none"><path d="M0 15 H70 M130 15 H200" stroke="var(--gold)" stroke-width="0.8" opacity="0.6"/><path d="M85 25 L100 10 L115 25" stroke="var(--gold)" stroke-width="0.8" opacity="0.6"/></svg>
+        </div>
       </div>
     </div>
   </div>
@@ -158,7 +172,7 @@
     </a>
 
     <p class="footer-sign">With love &amp; duas</p>
-    <p class="footer-fam">Nafees, Zoya &amp; Maliya</p>
+    <p class="footer-fam">Azam Farshori</p>
 
     <div class="footer-mosque" aria-hidden="true">
       <svg viewBox="0 0 320 140" fill="none">
