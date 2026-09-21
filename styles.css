@@ -20,12 +20,15 @@
   --sans: 'Jost','Helvetica Neue',Arial,sans-serif;
   --arabic: 'Amiri','Traditional Arabic',serif;
   box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 *,*::before,*::after{ box-sizing:inherit; }
-html{ scroll-behavior:smooth; height:100%; }
+html{ scroll-behavior:smooth; scroll-padding-top: env(safe-area-inset-top, 0px); height:100%; overflow-x:hidden; }
 body{
   margin:0; min-height:100%; background:var(--bg); color:var(--ivory);
   font-family:var(--sans); overflow-x:hidden; position:relative;
+  -webkit-text-size-adjust:100%; text-size-adjust:100%;
 }
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
@@ -56,12 +59,14 @@ body{
   transition: background-position .05s linear; }
 
 /* ---------- rotating mandala motifs ---------- */
-.mandala{ position:absolute; z-index:0; pointer-events:none; opacity:.14; will-change:transform; }
+.mandala{ position:absolute; left:50%; top:38%; transform:translate(-50%,-50%); z-index:0; pointer-events:none; opacity:.14; will-change:transform; }
 .mandala svg{ width:100%; height:100%; display:block; }
+.mandala-hero{ width:min(92vw,520px); height:min(92vw,520px); }
+.mandala-couple{ width:min(82vw,420px); height:min(82vw,420px); top:50%; }
 .mandala.spin-slow{ animation: spinSlow 120s linear infinite; }
 .mandala.spin-slow-rev{ animation: spinSlowRev 150s linear infinite; }
-@keyframes spinSlow{ to{ transform:rotate(360deg); } }
-@keyframes spinSlowRev{ to{ transform:rotate(-360deg); } }
+@keyframes spinSlow{ to{ transform:translate(-50%,-50%) rotate(360deg); } }
+@keyframes spinSlowRev{ to{ transform:translate(-50%,-50%) rotate(-360deg); } }
 
 /* ---------- shimmering gold text ---------- */
 .shimmer{
@@ -178,24 +183,25 @@ p{ margin:0; }
 .footer-mosque{ width:min(320px,80%); margin:3rem auto 0; opacity:.7; }
 .footer-fine{ margin-top:2.2rem; font-size:.72rem; color:var(--muted); letter-spacing:.08em; }
 
-#music-btn{ position:fixed; z-index:50; right:1.1rem; bottom:1.1rem; width:50px; height:50px; border-radius:50%; border:1px solid var(--line); background:rgba(20,18,16,0.75); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 22px -8px rgba(0,0,0,.6); transition:transform .3s cubic-bezier(.34,1.56,.64,1); }
-#music-btn:hover{ transform:scale(1.1) rotate(-8deg); }
-#music-btn svg{ width:20px; height:20px; color:var(--gold-bright); }
-#music-btn .bars{ display:flex; align-items:flex-end; gap:2px; height:14px; }
-#music-btn .bars span{ width:2.5px; background:var(--gold-bright); border-radius:2px; animation:bar 1s ease-in-out infinite; }
-#music-btn .bars span:nth-child(1){ height:5px; animation-delay:0s; }
-#music-btn .bars span:nth-child(2){ height:12px; animation-delay:.15s; }
-#music-btn .bars span:nth-child(3){ height:8px; animation-delay:.3s; }
-@keyframes bar{ 0%,100%{ transform:scaleY(.5);} 50%{ transform:scaleY(1);} }
-#music-btn:not(.playing) .bars{ display:none; }
-#music-btn.playing .icon-static{ display:none; }
+#music-btn{ position:fixed; z-index:50; right:calc(1.1rem + env(safe-area-inset-right,0px)); bottom:calc(1.1rem + env(safe-area-inset-bottom,0px)); width:52px; height:52px; border-radius:50%; border:1px solid var(--line); background:rgba(20,18,16,0.75); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 22px -8px rgba(0,0,0,.6); transition:transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .5s ease; }
+#music-btn:hover{ transform:scale(1.08); }
+#music-btn svg{ width:21px; height:21px; color:var(--gold-bright); position:relative; z-index:2; transition:transform .5s ease; }
+#music-btn::before{ content:''; position:absolute; inset:-5px; border-radius:50%; border:1px solid var(--gold); opacity:0; transform:scale(.85); transition:opacity .5s ease, transform .5s ease; }
+#music-btn::after{ content:''; position:absolute; inset:-5px; border-radius:50%; background:conic-gradient(from 0deg, transparent, var(--gold-bright), transparent 30%); opacity:0; filter:blur(3px); animation:haloSpin 4s linear infinite; }
+#music-btn.playing{ box-shadow:0 6px 26px -6px rgba(232,206,154,.55), 0 0 0 0 rgba(232,206,154,.4); animation:btnPulse 2.6s ease-in-out infinite; }
+#music-btn.playing::before{ opacity:.6; transform:scale(1); }
+#music-btn.playing::after{ opacity:.5; }
+#music-btn.playing svg{ transform:scale(1.05); }
+@keyframes haloSpin{ to{ transform:rotate(360deg); } }
+@keyframes btnPulse{ 0%,100%{ box-shadow:0 6px 26px -6px rgba(232,206,154,.4); } 50%{ box-shadow:0 6px 32px -4px rgba(232,206,154,.7); } }
 
-.corner-motif{ position:absolute; width:46px; height:46px; opacity:.5; z-index:1; }
-.corner-motif.tl{ top:1rem; left:1rem; }
-.corner-motif.tr{ top:1rem; right:1rem; transform:scaleX(-1); }
+.corner-motif{ position:absolute; width:40px; height:40px; opacity:.5; z-index:1; }
+.corner-motif.tl{ top:calc(1rem + env(safe-area-inset-top,0px)); left:calc(1rem + env(safe-area-inset-left,0px)); }
+.corner-motif.tr{ top:calc(1rem + env(safe-area-inset-top,0px)); right:calc(1rem + env(safe-area-inset-right,0px)); transform:scaleX(-1); }
 
 ::selection{ background:var(--gold); color:var(--bg); }
 a{ color:inherit; }
+.rsvp-btn, .im-in-btn, #music-btn, #hero-cue{ touch-action:manipulation; }
 
 /* ---------- envelope intro ---------- */
 #envelope-screen{ position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg); cursor:pointer; transition:opacity .8s ease, visibility .8s ease; }
@@ -218,3 +224,36 @@ a{ color:inherit; }
 #env-flash{ position:fixed; inset:0; z-index:199; background:radial-gradient(circle at 50% 45%, rgba(232,206,154,0.55), transparent 60%); opacity:0; pointer-events:none; }
 #env-flash.burst{ animation: envFlash 1s ease-out forwards; }
 @keyframes envFlash{ 0%{ opacity:0; } 15%{ opacity:1; } 100%{ opacity:0; } }
+
+/* =====================================================================
+   MOBILE TUNING — most guests will open this on a phone, so these
+   breakpoints tighten spacing and sizing rather than just scaling down.
+   ===================================================================== */
+@media (max-width: 480px){
+  section{ padding:4.5rem 1.25rem; }
+  #hero{ padding-top:2.4rem; }
+  .hero-frame{ padding:2.2rem 1rem 2rem; }
+  .divider{ margin:1.4rem auto; }
+  #hero-cue{ margin-top:1.8rem; }
+
+  .rcard{ padding:1.8rem 1.2rem; }
+  .rcard-row{ gap:.45rem; margin-top:1rem; }
+  .rcard-attire{ margin-top:1.1rem; padding-top:.85rem; }
+
+  .count-grid{ gap:.5rem .7rem; }
+  .count-cell{ min-width:52px; padding:.4rem 0; }
+  .count-cell::before{ width:60px; height:60px; margin-left:-30px; }
+  .count-num{ font-size:clamp(1.5rem,7.5vw,2.2rem); }
+  .count-sep{ display:none; } /* the wrap + gap already separates them cleanly at this width */
+
+  .im-in-btn, .rsvp-btn{ padding:.85rem 1.9rem; font-size:.8rem; }
+  .footer-mosque{ margin-top:2.2rem; }
+  .mandala-hero{ width:min(110vw,460px); height:min(110vw,460px); }
+  .mandala-couple{ width:min(100vw,380px); height:min(100vw,380px); }
+}
+
+@media (max-width: 360px){
+  .hero-names .name{ font-size:clamp(2.2rem,13vw,3rem); }
+  #hero-parents{ font-size:1rem; }
+  .rcard-title{ font-size:clamp(2rem,11vw,2.8rem); }
+}

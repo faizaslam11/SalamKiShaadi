@@ -111,6 +111,7 @@ sky.innerHTML = `
 
 /* ---------- hero intro timeline (plays once the envelope is opened) ---------- */
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isSmallScreen = window.matchMedia('(max-width: 640px)').matches;
 function playHeroIntro(){
   if (reducedMotion) {
     gsap.set('#hero-bismillah,#hero-line1,#hero-parents,.hero-names .ch,.hero-amp,#hero-tagline,#hero-cue', { opacity:1, y:0, x:0, scale:1, filter:'none' });
@@ -121,7 +122,7 @@ function playHeroIntro(){
   tl.to('#hero-bismillah', { opacity:1, y:0, duration:1.1 }, 0.1)
     .to('#hero-line1', { opacity:1, y:0, duration:1 }, 0.9)
     .to('#hero-parents', { opacity:1, y:0, duration:1 }, 1.7)
-    .to('#name1 .ch', { opacity:1, y:0, rotate:0, duration:.6, stagger:.035, ease:'back.out(1.6)' }, 2.6)
+    .to('#name1 .ch', { opacity:2, y:0, rotate:0, duration:.6, stagger:.035, ease:'back.out(1.6)' }, 2.6)
     .to('.hero-amp', { opacity:1, y:0, scale:1, duration:.7, ease:'back.out(2)' }, 3.05)
     .to('#name2 .ch', { opacity:1, y:0, rotate:0, duration:.6, stagger:.035, ease:'back.out(1.6)' }, 3.2)
     .to('#hero-tagline', { opacity:1, y:0, duration:1 }, 4.05)
@@ -173,6 +174,7 @@ function openEnvelope(){
 envScreen.addEventListener('click', openEnvelope);
 envScreen.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openEnvelope(); } });
 if (reducedMotion) setTimeout(openEnvelope, 300);
+setTimeout(() => { if (!envOpened) openEnvelope(); }, 1200);
 
 /* ---------- generic scroll reveal ---------- */
 const io = new IntersectionObserver((entries) => {
@@ -238,11 +240,11 @@ function spawnEmber(){
   emberLayer.appendChild(el);
   setTimeout(() => el.remove(), duration*1000 + 200);
 }
-let emberTimer = setInterval(spawnEmber, 500);
-for (let i=0;i<10;i++) setTimeout(spawnEmber, i*180);
+let emberTimer = setInterval(spawnEmber, isSmallScreen ? 900 : 500);
+for (let i=0;i<(isSmallScreen?6:10);i++) setTimeout(spawnEmber, i*180);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) clearInterval(emberTimer);
-  else emberTimer = setInterval(spawnEmber, 500);
+  else emberTimer = setInterval(spawnEmber, isSmallScreen ? 900 : 500);
 });
 
 /* burst of embers on click anywhere (skip interactive elements) */
@@ -308,43 +310,91 @@ document.getElementById('rsvp-link').addEventListener('click', function(e){
   setTimeout(() => ripple.remove(), 650);
 });
 
-/* ---------- music toggle: gentle generated ambient pad (no external file needed) ---------- */
-let audioCtx = null, ambientNodes = null;
-function buildAmbient(){
+/* ---------- music toggle: gentle generative melody, inspired by the
+   Hijaz maqam (the scale behind much classical Arabic/Islamic music) —
+   built entirely with the Web Audio API, so no external file or
+   licensing is needed. Not a real recorded nasheed, just an elegant
+   ambient placeholder; swap for a real track any time (see README). --- */
+let audioCtx = null, musicNodes = null, playing = false, noteTimer = null;
+
+// D Hijaz scale (root D3), spanning just over an octave, low → high
+const HIJAZ = [146.83, 155.56, 185.00, 196.00, 220.00, 233.08, 261.63, 293.66, 369.99];
+
+function buildMusicGraph(){
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
   const master = audioCtx.createGain();
   master.gain.value = 0;
   master.connect(audioCtx.destination);
-  const filter = audioCtx.createBiquadFilter();
-  filter.type = 'lowpass'; filter.frequency.value = 900;
-  filter.connect(master);
-  const freqs = [196.00, 246.94, 293.66]; // G3, B3, D4 — warm, simple triad
-  const oscs = freqs.map((f, i) => {
+
+  // soft feedback delay for a little space around each note
+  const delay = audioCtx.createDelay(1.0);
+  delay.delayTime.value = 0.34;
+  const feedback = audioCtx.createGain();
+  feedback.gain.value = 0.32;
+  const delayFilter = audioCtx.createBiquadFilter();
+  delayFilter.type = 'lowpass'; delayFilter.frequency.value = 2200;
+  delay.connect(delayFilter); delayFilter.connect(feedback); feedback.connect(delay);
+  delay.connect(master);
+
+  // warm open drone: root + fifth, no third (keeps it modal, not major/minor)
+  const padFilter = audioCtx.createBiquadFilter();
+  padFilter.type = 'lowpass'; padFilter.frequency.value = 700;
+  padFilter.connect(master);
+  [HIJAZ[0], HIJAZ[4]/2].forEach((f, i) => {
     const o = audioCtx.createOscillator();
     o.type = 'sine'; o.frequency.value = f;
-    const g = audioCtx.createGain(); g.gain.value = 0.16;
-    o.connect(g); g.connect(filter);
+    const g = audioCtx.createGain(); g.gain.value = 0.09;
+    o.connect(g); g.connect(padFilter);
     const lfo = audioCtx.createOscillator();
-    lfo.frequency.value = 0.06 + i*0.015;
-    const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 0.05;
+    lfo.frequency.value = 0.05 + i*0.012;
+    const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 0.03;
     lfo.connect(lfoGain); lfoGain.connect(g.gain);
     o.start(); lfo.start();
-    return { o, lfo, g };
   });
-  return { master, filter, oscs };
+
+  return { master, delay };
 }
+
+function pluckNote(freq){
+  const now = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  o.type = 'triangle'; o.frequency.value = freq;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass'; filter.frequency.value = freq*3.2;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0, now);
+  g.gain.linearRampToValueAtTime(0.22, now + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0005, now + 2.3);
+  const pan = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : null;
+  o.connect(filter); filter.connect(g);
+  if (pan) { pan.pan.value = (Math.random()*0.6-0.3); g.connect(pan); pan.connect(musicNodes.master); pan.connect(musicNodes.delay); }
+  else { g.connect(musicNodes.master); g.connect(musicNodes.delay); }
+  o.start(now); o.stop(now + 2.4);
+}
+
+function scheduleNotes(){
+  if (!playing) return;
+  // favour the tonic and fifth for a settled, meditative feel
+  const weighted = [0,0,4,4,1,2,3,5,6,7];
+  const idx = weighted[Math.floor(Math.random()*weighted.length)];
+  pluckNote(HIJAZ[idx] * (Math.random()<0.3 ? 2 : 1));
+  noteTimer = setTimeout(scheduleNotes, 1800 + Math.random()*1900);
+}
+
 const musicBtn = document.getElementById('music-btn');
-let playing = false;
 musicBtn.addEventListener('click', () => {
   if (!playing) {
-    if (!audioCtx) ambientNodes = buildAmbient();
+    if (!audioCtx) musicNodes = buildMusicGraph();
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    ambientNodes.master.gain.cancelScheduledValues(audioCtx.currentTime);
-    ambientNodes.master.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 1.4);
+    musicNodes.master.gain.cancelScheduledValues(audioCtx.currentTime);
+    musicNodes.master.gain.linearRampToValueAtTime(0.55, audioCtx.currentTime + 1.6);
     playing = true; musicBtn.classList.add('playing'); musicBtn.setAttribute('aria-pressed','true');
+    scheduleNotes();
   } else {
-    ambientNodes.master.gain.cancelScheduledValues(audioCtx.currentTime);
-    ambientNodes.master.gain.linearRampToValueAtTime(0, audioCtx.currentTime + .8);
+    musicNodes.master.gain.cancelScheduledValues(audioCtx.currentTime);
+    musicNodes.master.gain.linearRampToValueAtTime(0, audioCtx.currentTime + .9);
     playing = false; musicBtn.classList.remove('playing'); musicBtn.setAttribute('aria-pressed','false');
+    clearTimeout(noteTimer);
   }
 });
