@@ -4,7 +4,7 @@
 const CONFIG = {
   names: { first: "Salam", second: "Sara" },
   walimaDate: "2026-12-26T19:00:00+05:30", // countdown target
-  RSVP_LINK: "https://wa.me/+918394907770?text=Bismillah!%20I'd%20love%20to%20join%20you%20for%20the%20Walima.", // <-- replace with your real WhatsApp/RSVP link
+  RSVP_LINK: "https://wa.me/+918171601791?text=Bismillah!%20I'd%20love%20to%20join%20you%20for%20the%20Walima.", // <-- replace with your real WhatsApp/RSVP link
   MUSIC_SRC: "assets/music.mp3",
 };
 document.getElementById('rsvp-link').href = CONFIG.RSVP_LINK;
